@@ -1,3 +1,4 @@
+
 ---
 apiVersion: apps/v1
 kind: Deployment
@@ -28,7 +29,7 @@ spec:
               - ALL
           privileged: false
           readOnlyRootFilesystem: true
-        image: sharuelement/emailservice:latest
+        image: sharuelement/emailservice
         ports:
         - containerPort: 8080
         env:
@@ -38,12 +39,12 @@ spec:
           value: "1"
         readinessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          grpc:
+            port: 8080
         livenessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          grpc:
+            port: 8080
         resources:
           requests:
             cpu: 100m
@@ -79,17 +80,29 @@ spec:
         app: checkoutservice
     spec:
       serviceAccountName: default
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
         - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
           image: sharuelement/checkoutservice:latest
           ports:
           - containerPort: 5050
           readinessProbe:
-            exec:
-              command: ["/bin/grpc_health_probe", "-addr=:5050"]
+            grpc:
+              port: 5050
           livenessProbe:
-            exec:
-              command: ["/bin/grpc_health_probe", "-addr=:5050"]
+            grpc:
+              port: 5050
           env:
           - name: PORT
             value: "5050"
@@ -141,19 +154,31 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/recommendationservice:latest
         ports:
         - containerPort: 8080
         readinessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          grpc:
+            port: 8080
         livenessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:8080"]
+          grpc:
+            port: 8080
         env:
         - name: PORT
           value: "8080"
@@ -198,8 +223,20 @@ spec:
         sidecar.istio.io/rewriteAppHTTPProbers: "true"
     spec:
       serviceAccountName: default
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
         - name: server
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            privileged: false
+            readOnlyRootFilesystem: true
           image: sharuelement/frontend:latest
           ports:
           - containerPort: 8080
@@ -259,7 +296,7 @@ kind: Service
 metadata:
   name: frontend
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: frontend
   ports:
@@ -295,8 +332,20 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/paymentservice:latest
         ports:
         - containerPort: 50051
@@ -306,11 +355,11 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          grpc:
+            port: 50051
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          grpc:
+            port: 50051
         resources:
           requests:
             cpu: 100m
@@ -347,8 +396,20 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/productcatalogservice:latest
         ports:
         - containerPort: 3550
@@ -358,11 +419,11 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
+          grpc:
+            port: 3550
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:3550"]
+          grpc:
+            port: 3550
         resources:
           requests:
             cpu: 100m
@@ -399,8 +460,20 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/cartservice:latest
         ports:
         - containerPort: 7070
@@ -416,13 +489,13 @@ spec:
             memory: 128Mi
         readinessProbe:
           initialDelaySeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+          grpc:
+            port: 7070
         livenessProbe:
           initialDelaySeconds: 15
           periodSeconds: 10
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7070", "-rpc-timeout=5s"]
+          grpc:
+            port: 7070
 ---
 apiVersion: v1
 kind: Service
@@ -456,6 +529,34 @@ spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
       restartPolicy: Always
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
+      initContainers:
+      - command:
+        - /bin/sh
+        - -exc
+        - |
+          echo "Init container pinging frontend: ${FRONTEND_ADDR}..."
+          STATUSCODE=$(wget --server-response http://${FRONTEND_ADDR} 2>&1 | awk '/^  HTTP/{print $2}')
+          if test $STATUSCODE -ne 200; then
+              echo "Error: Could not reach frontend - Status code: ${STATUSCODE}"
+              exit 1
+          fi
+        name: frontend-check
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
+        image: busybox:latest
+        env:
+        - name: FRONTEND_ADDR
+          value: "frontend:80"
       containers:
       - name: main
         securityContext:
@@ -494,8 +595,20 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/currencyservice:latest
         ports:
         - name: grpc
@@ -506,11 +619,11 @@ spec:
         - name: DISABLE_PROFILER
           value: "1"
         readinessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+          grpc:
+            port: 7000
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:7000"]
+          grpc:
+            port: 7000
         resources:
           requests:
             cpu: 100m
@@ -546,8 +659,20 @@ spec:
         app: shippingservice
     spec:
       serviceAccountName: default
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/shippingservice:latest
         ports:
         - containerPort: 50051
@@ -558,11 +683,11 @@ spec:
           value: "1"
         readinessProbe:
           periodSeconds: 5
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          grpc:
+            port: 50051
         livenessProbe:
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:50051"]
+          grpc:
+            port: 50051
         resources:
           requests:
             cpu: 100m
@@ -597,8 +722,20 @@ spec:
       labels:
         app: redis-cart
     spec:
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: redis
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: redis:alpine
         ports:
         - containerPort: 6379
@@ -652,8 +789,20 @@ spec:
     spec:
       serviceAccountName: default
       terminationGracePeriodSeconds: 5
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsNonRoot: true
+        runAsUser: 1000
       containers:
       - name: server
+        securityContext:
+          allowPrivilegeEscalation: false
+          capabilities:
+            drop:
+              - ALL
+          privileged: false
+          readOnlyRootFilesystem: true
         image: sharuelement/adservice:latest
         ports:
         - containerPort: 9555
@@ -670,13 +819,13 @@ spec:
         readinessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+          grpc:
+            port: 9555
         livenessProbe:
           initialDelaySeconds: 20
           periodSeconds: 15
-          exec:
-            command: ["/bin/grpc_health_probe", "-addr=:9555"]
+          grpc:
+            port: 9555
 ---
 apiVersion: v1
 kind: Service
@@ -690,3 +839,4 @@ spec:
   - name: grpc
     port: 9555
     targetPort: 9555
+# [END gke_release_kubernetes_manifests_microservices_demo]
