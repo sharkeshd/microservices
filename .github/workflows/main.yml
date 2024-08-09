@@ -16,4 +16,15 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: setup jdk  
+        uses: actions/setup-java@v1
+        with:
+          java-version: 1.8
+          
+      - name: permissions
+        run: chmod +x gradlew
+
+      - name: build
+        uses: ./gradlew build
+
      
