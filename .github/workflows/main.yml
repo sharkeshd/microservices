@@ -1,4 +1,4 @@
-name:  Pipeline
+name: Pipeline
 
 on:
   push:
@@ -14,5 +14,16 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3add trivy file scan stage
- 
+        uses: actions/checkout@v3
+
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+
+      - name: Trivy scan
+        run: |
+          trivy fs --exit-code 1 --no-progress .
+        continue-on-error: true
