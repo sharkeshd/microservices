@@ -15,14 +15,4 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3add trivy file scan stage
-  trivy:
-    runs-on: ubuntu-latest
-
-    steps:
-     - name: Install Trivy
-        run: |
-          curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
-
-      - name: Run Trivy scan
-        run: |
-          trivy fs . # Scan the current directory. Adjust the path or options as neede
+ 
