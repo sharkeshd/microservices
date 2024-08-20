@@ -1,4 +1,4 @@
-name: Pipeline
+name:  Pipeline
 
 on:
   push:
@@ -14,26 +14,11 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Set up Node.js (or your preferred environment)
-        uses: actions/setup-node@v3
-        with:
-          node-version: '14' # Adjust based on your environment
-
-      - name: Install dependencies
-        run: npm install # Adjust based on your dependency manager
-
-      - name: Run build
-        run: npm run build # Adjust to your build command
-
-      - name: Run tests
-        run: npm test # Adjust to your test command
-
+        uses: actions/checkout@v3add trivy file scan stage
       - name: Install Trivy
         run: |
           curl -sSL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sudo sh
 
       - name: Run Trivy scan
         run: |
-          trivy fs . # Scan the current directory. Adjust the path or options as needed
+          trivy fs . # Scan the current directory. Adjust the path or options as needed  
