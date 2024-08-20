@@ -17,7 +17,7 @@ Kubernetes Engine (GKE). It’s **easy to deploy with little to no configuration
 If you’re using this demo, please **★Star** this repository to show your interest!
 
 **Note to Googlers (Google employees):** Please fill out the form at [go/microservices-demo](http://go/microservices-demo).
-
+ 
 ## Screenshots
 
 | Home Page                                                                                                         | Checkout Screen                                                                                                    |
