@@ -28,27 +28,15 @@ jobs:
           wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
 
-  docker-build:
+  trivy-scan:
     runs-on: ubuntu-latest
-    needs: checkout
+    needs: install-trivy
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Build Docker image
-        run: |
-          docker build -t my-image-name /src/adservice/
-
-  trivy-scan:
-    runs-on: ubuntu-latest
-    needs: [install-trivy, docker-build]
-    steps:
-      - name: Install Docker
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y docker.io
-
+        
       - name: Trivy scan
         run: |
-          trivy image --exit-code 1 --no-progress my-image-name
+          trivy fs --exit-code 1 --no-progress .
         continue-on-error: true
