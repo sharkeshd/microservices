@@ -132,4 +132,4 @@ jobs:
       - name: Build Docker image for cartservice
         run: |
           docker build -t my-app-image-cartservice:latest .
-        working-directory: ./src/cartservice/
+        working-directory: ./src/cartservice/src/
