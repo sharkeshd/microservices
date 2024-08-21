@@ -68,7 +68,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image for adservice
         run: |
@@ -86,7 +86,7 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+        uses: docker/setup-buildx-action@v3
 
       - name: Build Docker image for cartservice
         run: |
@@ -96,74 +96,24 @@ jobs:
       - name: List Docker images after build
         run: docker images
 
-  push-docker-image-staging-adservice:
+  docker-push-adservice:
     runs-on: ubuntu-latest
     needs: docker-build-adservice
     steps:
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_SECRET }}
+          username: ${{ secrets.DOCKERHUB_USER }}
+          password: ${{ secrets.DOCKERHUB_SECRET }}
 
-      - name: List Docker images before tagging
-        run: docker images
-
-      - name: Tag and Push Docker image for adservice to staging
-        run: |
-          docker tag my-app-image-adservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-adservice:staging
-          docker push ${{ secrets.DOCKER_USER }}/my-app-image-adservice:staging
-
-  push-docker-image-staging-cartservice:
-    runs-on: ubuntu-latest
-    needs: docker-build-cartservice
-    steps:
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
+      - name: Build and push
+        uses: docker/build-push-action@v6
         with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_SECRET }}
-
-      - name: List Docker images before tagging
-        run: docker images
-
-      - name: Tag and Push Docker image for cartservice to staging
-        run: |
-          docker tag my-app-image-cartservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:staging
-          docker push ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:staging
-
-  push-docker-image-production-adservice:
-    runs-on: ubuntu-latest
-    needs: push-docker-image-staging-adservice
-    steps:
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_SECRET }}
-
-      - name: List Docker images before tagging
-        run: docker images
-
-      - name: Tag and Push Docker image for adservice to production
-        run: |
-          docker tag my-app-image-adservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-adservice:latest
-          docker push ${{ secrets.DOCKER_USER }}/my-app-image-adservice:latest
-
-  push-docker-image-production-cartservice:
-    runs-on: ubuntu-latest
-    needs: push-docker-image-staging-cartservice
-    steps:
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_SECRET }}
-
-      - name: List Docker images before tagging
-        run: docker images
-
-      - name: Tag and Push Docker image for cartservice to production
-        run: |
-          docker tag my-app-image-cartservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:latest
-          docker push ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:latest
+          push: true
+          tags: sharuelement/my-app-image-adservice:latest
