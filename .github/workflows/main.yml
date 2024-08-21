@@ -65,6 +65,14 @@ jobs:
     needs: docker-build-adservice
 
     steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+          sudo apt-get install -f  # Fix dependencies
+
       - name: Trivy scan for adservice Docker image
         run: |
           trivy image --exit-code 1 --no-progress my-app-image-adservice:latest
@@ -124,6 +132,14 @@ jobs:
     needs: docker-build-cartservice
 
     steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+          sudo apt-get install -f  # Fix dependencies
+
       - name: Trivy scan for cartservice Docker image
         run: |
           trivy image --exit-code 1 --no-progress my-app-image-cartservice:latest
