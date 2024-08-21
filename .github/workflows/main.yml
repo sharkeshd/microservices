@@ -52,11 +52,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up Java
-        uses: actions/setup-java@v3
-        with:
-          java-version: '19'  # Specify the Java version that matches your Gradle project
-
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v3
         with:
@@ -149,7 +144,7 @@ jobs:
       - name: Build Docker image for cartservice
         run: |
           docker build -t my-app-image-cartservice:latest .
-        working-directory: ./src/cartservice/src/
+        working-directory: ./src/cartservice/
 
   trivy-scan-cartservice-image:
     runs-on: ubuntu-latest
