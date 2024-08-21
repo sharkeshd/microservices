@@ -90,7 +90,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_KEY }}
+          password: ${{ secrets.DOCKER_SECRET }}
 
       - name: Push Docker image for adservice
         run: |
@@ -159,7 +159,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_KRY }}
+          password: ${{ secrets.DOCKER_SECRET }}
 
       - name: Push Docker image for cartservice
         run: |
