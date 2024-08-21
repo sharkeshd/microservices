@@ -119,7 +119,7 @@ jobs:
           dotnet test --no-build --verbosity normal
 
   docker-build-cartservice:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     needs: dotnet-build-cartservice
 
     steps:
