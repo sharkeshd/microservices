@@ -55,12 +55,12 @@ jobs:
       - name: Set up Java
         uses: actions/setup-java@v3
         with:
-          java-version: '11'  # Specify the Java version that matches your Gradle project
+          java-version: '19'  # Specify the Java version that matches your Gradle project
 
       - name: Set up Gradle
         uses: gradle/gradle-build-action@v3
         with:
-          gradle-version: '8.x'  # Specify the Gradle version that matches your project
+          gradle-version: '7.4'  # Specify the Gradle version that matches your project
 
       - name: Build and test with Gradle for adservice
         run: |
