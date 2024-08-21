@@ -53,18 +53,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Set up JDK
-        uses: actions/setup-java@v3
-        with:
-          java-version: '11'  # Specify your JDK version
-
-      - name: Build with Gradle
-        run: ./gradlew build
-        working-directory: ./src/adservice/
-
-      - name: Run tests
-        run: ./gradlew test
-        working-directory: ./src/adservice/
+      - name: Build and test with Gradle using Docker
+        run: |
+          docker run --rm \
+            -v $(pwd)/src/adservice:/workspace \
+            -w /workspace \
+            eclipse-temurin:19.0.1_10-jre-alpine \
+            sh -c "./gradlew build && ./gradlew test"
 
   docker-build:
     runs-on: ubuntu-latest
