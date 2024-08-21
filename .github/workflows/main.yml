@@ -60,9 +60,11 @@ jobs:
 
       - name: Build with Gradle
         run: ./gradlew build
+        working-directory: ./src/adservice/
 
       - name: Run tests
         run: ./gradlew test
+        working-directory: ./src/adservice/
 
   docker-build:
     runs-on: ubuntu-latest
@@ -78,3 +80,4 @@ jobs:
       - name: Build Docker image
         run: |
           docker build -t my-app-image:latest .
+        working-directory: ./src/adservice/
