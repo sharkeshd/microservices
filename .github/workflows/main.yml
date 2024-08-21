@@ -55,7 +55,14 @@ jobs:
 
       - name: Build Docker image with Gradle
         run: |
-          docker build -t gradle-image:latest -f src/adservice/Dockerfile .
+          docker build -t gradle-image:latest -f src/adservice/Dockerfile src/adservice
+
+      - name: Build and test with Gradle using Docker
+        run: |
+          docker run --rm \
+            -v $(pwd)/src/adservice:/workspace \
+            -w /workspace \
+            gradle-image:latest build && gradle-image:latest test
 
   docker-build:
     runs-on: ubuntu-latest
