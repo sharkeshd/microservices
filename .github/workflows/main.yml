@@ -75,7 +75,7 @@ jobs:
           docker build -t my-app-image-adservice:latest .
         working-directory: ./src/adservice/
 
-      - name: List Docker images
+      - name: List Docker images after build
         run: docker images
 
   docker-build-cartservice:
@@ -93,7 +93,7 @@ jobs:
           docker build -t my-app-image-cartservice:latest .
         working-directory: ./src/cartservice/src/
 
-      - name: List Docker images
+      - name: List Docker images after build
         run: docker images
 
   push-docker-image-staging-adservice:
@@ -106,7 +106,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_SECRET }}
 
-      - name: List Docker images
+      - name: List Docker images before tagging
         run: docker images
 
       - name: Tag and Push Docker image for adservice to staging
@@ -124,7 +124,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_SECRET }}
 
-      - name: List Docker images
+      - name: List Docker images before tagging
         run: docker images
 
       - name: Tag and Push Docker image for cartservice to staging
@@ -142,7 +142,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_SECRET }}
 
-      - name: List Docker images
+      - name: List Docker images before tagging
         run: docker images
 
       - name: Tag and Push Docker image for adservice to production
@@ -160,7 +160,7 @@ jobs:
           username: ${{ secrets.DOCKER_USER }}
           password: ${{ secrets.DOCKER_SECRET }}
 
-      - name: List Docker images
+      - name: List Docker images before tagging
         run: docker images
 
       - name: Tag and Push Docker image for cartservice to production
