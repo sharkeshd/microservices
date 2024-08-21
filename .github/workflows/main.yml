@@ -27,7 +27,9 @@ jobs:
           sudo apt-get install -y wget
           wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
-          working-directory: ./src/adservice/.
+
+      - name: Verify Trivy installation
+        run: trivy --version
 
   trivy-scan:
     runs-on: ubuntu-latest
@@ -41,4 +43,4 @@ jobs:
         run: |
           trivy fs --exit-code 1 --no-progress .
         continue-on-error: true
-        working-directory: ./src/adservice/.
+        working-directory: ./src/adservice/
