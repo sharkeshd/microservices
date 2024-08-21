@@ -52,13 +52,21 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
+      - name: Set up Java
+        uses: actions/setup-java@v3
+        with:
+          java-version: '11'  # Specify the Java version that matches your Gradle project
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.x'  # Specify the Gradle version that matches your project
+
       - name: Build and test with Gradle for adservice
         run: |
-          docker build -t gradle-image-adservice:latest -f src/adservice/Dockerfile src/adservice
-          docker run --rm \
-            -v $(pwd)/src/adservice:/workspace \
-            -w /workspace \
-            gradle-image-adservice:latest build && gradle-image-adservice:latest test
+          cd src/adservice
+          gradle build
+          gradle test
 
   docker-build-adservice:
     runs-on: ubuntu-latest
@@ -124,4 +132,4 @@ jobs:
       - name: Build Docker image for cartservice
         run: |
           docker build -t my-app-image-cartservice:latest .
-        working-directory: ./src/cartservice/src
+        working-directory: ./src/cartservice/
