@@ -46,20 +46,20 @@ jobs:
         working-directory: ./src/adservice/
 
   gradle-build:
-    runs-on: ubuntu-latest
-    needs: checkout
+  runs-on: ubuntu-latest
+  needs: checkout
 
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+  steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
 
-      - name: Build and test with Gradle using Docker
-        run: |
-          docker run --rm \
-            -v $(pwd)/src/adservice:/workspace \
-            -w /workspace \
-            eclipse-temurin:19.0.1_10-jre-alpine \
-            sh -c "./gradlew build && ./gradlew test"
+    - name: Build and test with Gradle using Docker
+      run: |
+        docker run --rm \
+          -v $(pwd)/src/adservice:/workspace \
+          -w /workspace \
+          eclipse-temurin:19.0.1_10-jre-alpine \
+          sh -c "chmod +x ./gradlew && ./gradlew build && ./gradlew test"
 
   docker-build:
     runs-on: ubuntu-latest
