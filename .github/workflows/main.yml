@@ -109,7 +109,7 @@ jobs:
         run: |
           trivy fs --exit-code 1 --no-progress .
         continue-on-error: true
-        working-directory: ./src/cartservice/
+        working-directory: ./src/cartservice/src/
 
   dotnet-build-cartservice:
     runs-on: ubuntu-latest
@@ -145,7 +145,7 @@ jobs:
       - name: Build Docker image for cartservice
         run: |
           docker build -t my-app-image-cartservice:latest .
-        working-directory: ./src/cartservice/SRC/
+        working-directory: ./src/cartservice/src/
 
   push-docker-image-cartservice:
     runs-on: ubuntu-latest
