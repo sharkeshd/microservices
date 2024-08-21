@@ -1,42 +1,164 @@
-# Copyright 2020 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
+name: Pipeline
 
-FROM eclipse-temurin:19@sha256:f3fbf1ad599d4b5dbdd7ceb55708d10cb9fafb08e094ef91e92aa63b520a232e as builder
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
 
-WORKDIR /app
- 
-COPY ["build.gradle", "gradlew", "./"]
-COPY gradle gradle
-RUN chmod +x gradlew
-RUN ./gradlew downloadRepos
+jobs:
+  checkout:
+    runs-on: ubuntu-latest
 
-COPY . .
-RUN chmod +x gradlew
-RUN ./gradlew installDist
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-FROM eclipse-temurin:19.0.1_10-jre-alpine@sha256:fabe27bd9db502d484a11d3f571c2f4ef7bba4a172527084d939935358fb06c4
+  install-trivy:
+    runs-on: ubuntu-latest
+    needs: checkout
 
-RUN apk add --no-cache ca-certificates
+    steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+          sudo apt-get install -f  # Fix dependencies
+          trivy --version
 
-# Download Stackdriver Profiler Java agent
-RUN mkdir -p /opt/cprof && \
-    wget -q -O- https://storage.googleapis.com/cloud-profiler/java/latest/profiler_java_agent_alpine.tar.gz \
-    | tar xzv -C /opt/cprof && \
-    rm -rf profiler_java_agent.tar.gz
+  trivy-scan-adservice:
+    runs-on: ubuntu-latest
+    needs: install-trivy
 
-WORKDIR /app
-COPY --from=builder /app .
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-EXPOSE 9555
-ENTRYPOINT ["/app/build/install/hipstershop/bin/AdService"]
+      - name: Trivy scan for adservice
+        run: |
+          trivy fs --exit-code 1 --no-progress .
+        continue-on-error: true
+        working-directory: ./src/adservice/
+
+  gradle-build-adservice:
+    runs-on: ubuntu-latest
+    needs: checkout
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.x'  # Specify the Gradle version that matches your project
+
+      - name: Build and test with Gradle for adservice
+        run: |
+          cd src/adservice
+          gradle build
+          gradle test
+
+  docker-build-adservice:
+    runs-on: ubuntu-latest
+    needs: gradle-build-adservice
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image for adservice
+        run: |
+          docker build -t my-app-image-adservice:latest .
+        working-directory: ./src/adservice/
+
+  trivy-scan-adservice-image:
+    runs-on: ubuntu-latest
+    needs: docker-build-adservice
+
+    steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+          sudo apt-get install -f  # Fix dependencies
+
+      - name: Trivy scan for adservice Docker image
+        run: |
+          trivy image --exit-code 1 --no-progress my-app-image-adservice:latest
+
+  trivy-scan-cartservice:
+    runs-on: ubuntu-latest
+    needs: install-trivy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Trivy scan for cartservice
+        run: |
+          trivy fs --exit-code 1 --no-progress .
+        continue-on-error: true
+        working-directory: ./src/cartservice/
+
+  dotnet-build-cartservice:
+    runs-on: ubuntu-latest
+    needs: checkout
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'  # Specify the .NET version you need
+
+      - name: Build and test with .NET for cartservice
+        run: |
+          cd src/cartservice
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test --no-build --verbosity normal
+
+  docker-build-cartservice:
+    runs-on: ubuntu-latest 
+    needs: dotnet-build-cartservice
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image for cartservice
+        run: |
+          docker build -t my-app-image-cartservice:latest .
+        working-directory: ./src/cartservice/
+
+  trivy-scan-cartservice-image:
+    runs-on: ubuntu-latest
+    needs: docker-build-cartservice
+
+    steps:
+      - name: Install Trivy
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y wget
+          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
+          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+          sudo apt-get install -f  # Fix dependencies
+
+      - name: Trivy scan for cartservice Docker image
+        run: |
+          trivy image --exit-code 1 --no-progress my-app-image-cartservice:latest
