@@ -27,25 +27,24 @@ jobs:
           sudo apt-get install -y wget
           wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
           sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
+          sudo apt-get install -f  # Fix dependencies
+          trivy --version
 
-      - name: Verify Trivy installation
-        run: trivy --version
-
-  trivy-scan:
+  trivy-scan-adservice:
     runs-on: ubuntu-latest
     needs: install-trivy
 
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        
-      - name: Trivy scan
+
+      - name: Trivy scan for adservice
         run: |
           trivy fs --exit-code 1 --no-progress .
         continue-on-error: true
         working-directory: ./src/adservice/
 
-  gradle-build:
+  gradle-build-adservice:
     runs-on: ubuntu-latest
     needs: checkout
 
@@ -53,20 +52,17 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build Docker image with Gradle
+      - name: Build and test with Gradle for adservice
         run: |
-          docker build -t gradle-image:latest -f src/adservice/Dockerfile src/adservice
-
-      - name: Build and test with Gradle using Docker
-        run: |
+          docker build -t gradle-image-adservice:latest -f src/adservice/Dockerfile src/adservice
           docker run --rm \
             -v $(pwd)/src/adservice:/workspace \
             -w /workspace \
-            gradle-image:latest build && gradle-image:latest test
+            gradle-image-adservice:latest build && gradle-image-adservice:latest test
 
-  docker-build:
+  docker-build-adservice:
     runs-on: ubuntu-latest
-    needs: gradle-build
+    needs: gradle-build-adservice
 
     steps:
       - name: Checkout code
@@ -75,7 +71,57 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
 
-      - name: Build Docker image
+      - name: Build Docker image for adservice
         run: |
-          docker build -t my-app-image:latest .
+          docker build -t my-app-image-adservice:latest .
         working-directory: ./src/adservice/
+
+  trivy-scan-cartservice:
+    runs-on: ubuntu-latest
+    needs: install-trivy
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Trivy scan for cartservice
+        run: |
+          trivy fs --exit-code 1 --no-progress .
+        continue-on-error: true
+        working-directory: ./src/cartservice/
+
+  dotnet-build-cartservice:
+    runs-on: ubuntu-latest
+    needs: checkout
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '7.x'  # Specify the .NET version you need
+
+      - name: Build and test with .NET for cartservice
+        run: |
+          cd src/cartservice
+          dotnet restore
+          dotnet build --no-restore
+          dotnet test --no-build --verbosity normal
+
+  docker-build-cartservice:
+    runs-on: ubuntu-latest
+    needs: dotnet-build-cartservice
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker image for cartservice
+        run: |
+          docker build -t my-app-image-cartservice:latest .
+        working-directory: ./src/cartservice/
