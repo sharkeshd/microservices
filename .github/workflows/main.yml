@@ -90,48 +90,4 @@ jobs:
           docker build -t my-app-image-cartservice:latest .
         working-directory: ./src/cartservice/src/
 
-  push-docker-image-adservice:
-    runs-on: ubuntu-latest
-    needs: docker-build-adservice
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_SECRET }}
-
-      - name: Debugging: Verify Docker Images
-        run: |
-          docker images
-          docker image ls
-
-      - name: Push Docker image for adservice
-        run: |
-          docker tag my-app-image-adservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-adservice:latest
-          docker push ${{ secrets.DOCKER_USER }}/my-app-image-adservice:latest
-
-  push-docker-image-cartservice:
-    runs-on: ubuntu-latest
-    needs: docker-build-cartservice
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Log in to Docker Hub
-        uses: docker/login-action@v2
-        with:
-          username: ${{ secrets.DOCKER_USER }}
-          password: ${{ secrets.DOCKER_SECRET }}
-
-      - name: Debugging: Verify Docker Images
-        run: |
-          docker images
-          docker image ls
-
-      - name: Push Docker image for cartservice
-        run: |
-          docker tag my-app-image-cartservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:latest
-          docker push ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:latest
+ 
