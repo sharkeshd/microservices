@@ -53,13 +53,9 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Build and test with Gradle using Docker
+      - name: Build Docker image with Gradle
         run: |
-          docker run --rm \
-            -v $(pwd)/src/adservice:/workspace \
-            -w /workspace \
-            eclipse-temurin:19.0.1_10-jre-alpine \
-            sh -c "chmod +x ./gradlew && ./gradlew build && ./gradlew test"
+          docker build -t gradle-image:latest -f src/adservice/Dockerfile .
 
   docker-build:
     runs-on: ubuntu-latest
