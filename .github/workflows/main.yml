@@ -44,9 +44,28 @@ jobs:
         continue-on-error: true
         working-directory: ./src/adservice/
 
+  gradle-build-adservice:
+    runs-on: ubuntu-latest
+    needs: checkout
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Set up Gradle
+        uses: gradle/gradle-build-action@v3
+        with:
+          gradle-version: '8.x'  # Specify the Gradle version that matches your project
+
+      - name: Build and test with Gradle for adservice
+        run: |
+          cd src/adservice
+          gradle build
+          gradle test
+
   docker-build-adservice:
     runs-on: ubuntu-latest
-    needs: trivy-scan-adservice
+    needs: gradle-build-adservice
 
     steps:
       - name: Checkout code
@@ -60,22 +79,23 @@ jobs:
           docker build -t my-app-image-adservice:latest .
         working-directory: ./src/adservice/
 
-  trivy-scan-adservice-image:
+  push-docker-image-adservice:
     runs-on: ubuntu-latest
     needs: docker-build-adservice
-
     steps:
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
-          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
-          sudo apt-get install -f  # Fix dependencies
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Trivy scan for adservice Docker image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_KEY }}
+
+      - name: Push Docker image for adservice
         run: |
-          trivy image --exit-code 1 --no-progress my-app-image-adservice:latest
+          docker tag my-app-image-adservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-adservice:latest
+          docker push ${{ secrets.DOCKER_USER }}/my-app-image-adservice:latest
 
   trivy-scan-cartservice:
     runs-on: ubuntu-latest
@@ -125,21 +145,23 @@ jobs:
       - name: Build Docker image for cartservice
         run: |
           docker build -t my-app-image-cartservice:latest .
-        working-directory: ./src/cartservice/src/
+        working-directory: ./src/cartservice/SRC/
 
-  trivy-scan-cartservice-image:
+  push-docker-image-cartservice:
     runs-on: ubuntu-latest
     needs: docker-build-cartservice
 
     steps:
-      - name: Install Trivy
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y wget
-          wget https://github.com/aquasecurity/trivy/releases/download/v0.35.0/trivy_0.35.0_Linux-64bit.deb
-          sudo dpkg -i trivy_0.35.0_Linux-64bit.deb
-          sudo apt-get install -f  # Fix dependencies
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      - name: Trivy scan for cartservice Docker image
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ secrets.DOCKER_USER }}
+          password: ${{ secrets.DOCKER_KRY }}
+
+      - name: Push Docker image for cartservice
         run: |
-          trivy image --exit-code 1 --no-progress my-app-image-cartservice:latest
+          docker tag my-app-image-cartservice:latest ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:latest
+          docker push ${{ secrets.DOCKER_USER }}/my-app-image-cartservice:latest
