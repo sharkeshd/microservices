@@ -62,13 +62,27 @@ jobs:
 
   docker-build-and-push:
     runs-on: ubuntu-latest
-    needs: dotnet-build-cartservice
+    needs: checkout
+    strategy:
+      matrix:
+        service:
+          - adservice
+          - cartservice
+          - checkoutservice
+          - currencyservice
+          - emailservice
+          - frontend
+          - loadgenerator
+          - paymentservice
+          - productcatalogservice
+          - recommendationservice
+          - shippingservice
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
       - name: List files in context directory
-        run: ls -la ./src/cartservice/
+        run: ls -la ./src/${{ matrix.service }}/
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
@@ -86,5 +100,5 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          tags: sharuelement/newcart:latest
-          context: ./src/cartservice/src/  # Ensure this is the correct path
+          tags: sharuelement/new${{ matrix.service }}:latest
+          context: ./src/${{ matrix.service }}/
