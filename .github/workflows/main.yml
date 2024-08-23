@@ -81,4 +81,5 @@ jobs:
         with:
           push: true
           tags: user/app:latest
-          context: ./src/cartservice/src/
+          working-directory: ./src/cargervice/src/
+          
