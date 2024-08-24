@@ -43,7 +43,7 @@ jobs:
       uses: actions/checkout@v3
 
     - name: Set up Trivy
-      uses: aquasecurity/trivy-action@v0.8.0
+      uses: aquasecurity/trivy-action@v0.15.0  # Replace with the latest version if needed
 
     - name: Run Trivy scan
       id: trivy
@@ -54,7 +54,7 @@ jobs:
       uses: actions/upload-artifact@v3
       with:
         name: trivy-report
-        path: .github/trivy-report.json        
+        path: .github/trivy-report.json       
 
   install-trivy:
     runs-on: ubuntu-latest
