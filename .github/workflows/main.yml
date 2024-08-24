@@ -59,7 +59,7 @@ jobs:
 
       - name: Trivy scan for adservice
         run: |
-          trivy fs --exit-code 1 --no-progress . > .github/trivy-adservice-results.txt || true
+          trivy fs --exit-code 1 --no-progress . > new/trivy-adservice-results.txt || true
         working-directory: ./src/adservice/
         continue-on-error: true
 
