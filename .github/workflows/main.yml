@@ -34,6 +34,28 @@ jobs:
         with:
           sarif_file: devskim-results.sarif
 
+  scan:
+    name: Run Trivy Scan
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Set up Trivy
+      uses: aquasecurity/trivy-action@v0.8.0
+
+    - name: Run Trivy scan
+      id: trivy
+      run: |
+        trivy fs --format json --output .github/trivy-report.json .
+
+    - name: Upload Trivy report
+      uses: actions/upload-artifact@v3
+      with:
+        name: trivy-report
+        path: .github/trivy-report.json        
+
   install-trivy:
     runs-on: ubuntu-latest
     needs: checkout
